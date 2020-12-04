@@ -1,0 +1,29 @@
+version: "3.7"
+services:
+  omdbapp:
+    container_name: omdbapp
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8888:8888
+    expose:
+      - "8888"
+    depends_on:
+      - db
+  db:
+    container_name: db
+    image: mysql:8.0.22
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    ports:
+      - 3306:3306
+    expose:
+      - "3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: supersecretpassword
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
