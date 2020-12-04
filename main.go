@@ -13,9 +13,8 @@ import (
 func main() {
 	var wait time.Duration
 
+	// HTTP Server
 	httpServer := httpserver.InitHTTPServer()
-
-	// Run our server in a goroutine so that it doesn't block.
 	go func() {
 		log.Println("[omdbapp][API] Served on " + httpServer.Addr)
 		if err := httpServer.ListenAndServe(); err != nil {
