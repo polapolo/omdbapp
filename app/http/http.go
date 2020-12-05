@@ -32,7 +32,7 @@ func InitHTTPServer() *http.Server {
 	// init routes
 	r := gin.Default()
 	r.GET("/search", func(c *gin.Context) { omdbHandler.Search(c) })
-	r.GET("/detail", func(c *gin.Context) { omdbHandler.GetByID(c) })
+	r.GET("/detail/:id", func(c *gin.Context) { omdbHandler.GetByID(c) })
 
 	// server
 	srv := &http.Server{

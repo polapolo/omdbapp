@@ -61,11 +61,8 @@ func (h OMDBHttpHandler) Search(c *gin.Context) {
 }
 
 func (h OMDBHttpHandler) GetByID(c *gin.Context) {
-	// set default payload if empty
-	id := c.DefaultQuery("id", "")
-
 	// get search result
-	response, err := h.omdbUsecase.GetByID(c.Request.Context(), id)
+	response, err := h.omdbUsecase.GetByID(c.Request.Context(), c.Param("id"))
 	if err != nil {
 		c.JSON(200, gin.H{
 			"data":  []struct{}{},
