@@ -7,6 +7,7 @@ package mock_service_provider
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
+	entity "github.com/polapolo/omdbapp/internal/entity"
 	repository "github.com/polapolo/omdbapp/internal/repository"
 	reflect "reflect"
 )
@@ -62,4 +63,41 @@ func (m *MockOMDBApiRepositoryInterface) GetByID(ctx context.Context, imdbID str
 func (mr *MockOMDBApiRepositoryInterfaceMockRecorder) GetByID(ctx, imdbID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockOMDBApiRepositoryInterface)(nil).GetByID), ctx, imdbID)
+}
+
+// MockSearchRepositoryInterface is a mock of SearchRepositoryInterface interface
+type MockSearchRepositoryInterface struct {
+	ctrl     *gomock.Controller
+	recorder *MockSearchRepositoryInterfaceMockRecorder
+}
+
+// MockSearchRepositoryInterfaceMockRecorder is the mock recorder for MockSearchRepositoryInterface
+type MockSearchRepositoryInterfaceMockRecorder struct {
+	mock *MockSearchRepositoryInterface
+}
+
+// NewMockSearchRepositoryInterface creates a new mock instance
+func NewMockSearchRepositoryInterface(ctrl *gomock.Controller) *MockSearchRepositoryInterface {
+	mock := &MockSearchRepositoryInterface{ctrl: ctrl}
+	mock.recorder = &MockSearchRepositoryInterfaceMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockSearchRepositoryInterface) EXPECT() *MockSearchRepositoryInterfaceMockRecorder {
+	return m.recorder
+}
+
+// InsertSearchHistory mocks base method
+func (m *MockSearchRepositoryInterface) InsertSearchHistory(ctx context.Context, row entity.Search) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertSearchHistory", ctx, row)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertSearchHistory indicates an expected call of InsertSearchHistory
+func (mr *MockSearchRepositoryInterfaceMockRecorder) InsertSearchHistory(ctx, row interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertSearchHistory", reflect.TypeOf((*MockSearchRepositoryInterface)(nil).InsertSearchHistory), ctx, row)
 }

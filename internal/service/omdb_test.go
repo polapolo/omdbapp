@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/polapolo/omdbapp/internal/entity"
 	"github.com/polapolo/omdbapp/internal/mock_service_provider"
 	"github.com/polapolo/omdbapp/internal/repository"
 	"github.com/stretchr/testify/assert"
@@ -15,6 +16,7 @@ import (
 func TestNewOMDBService(t *testing.T) {
 	type args struct {
 		omdbAPIRepository OMDBApiRepositoryInterface
+		searchRepository  SearchRepositoryInterface
 	}
 	tests := []struct {
 		name string
@@ -29,7 +31,7 @@ func TestNewOMDBService(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewOMDBService(tt.args.omdbAPIRepository); !reflect.DeepEqual(got, tt.want) {
+			if got := NewOMDBService(tt.args.omdbAPIRepository, tt.args.searchRepository); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewOMDBService() = %v, want %v", got, tt.want)
 			}
 		})
@@ -41,6 +43,7 @@ func TestOMDBService_Search(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockOMDBApiRepository := mock_service_provider.NewMockOMDBApiRepositoryInterface(ctrl)
+	mockSearchRepository := mock_service_provider.NewMockSearchRepositoryInterface(ctrl)
 	mockCtx := context.Background()
 
 	type args struct {
@@ -58,7 +61,7 @@ func TestOMDBService_Search(t *testing.T) {
 	}{
 		{
 			"success",
-			OMDBService{mockOMDBApiRepository},
+			OMDBService{mockOMDBApiRepository, mockSearchRepository},
 			args{
 				mockCtx,
 				"keyword",
@@ -78,11 +81,45 @@ func TestOMDBService_Search(t *testing.T) {
 							{},
 						},
 					}, nil)
+
+				mockSearchRepository.EXPECT().
+					InsertSearchHistory(mockCtx, entity.Search{
+						Keyword: "keyword",
+						Page:    1,
+					}).
+					Return(nil)
 			},
 		},
 		{
-			"error",
-			OMDBService{mockOMDBApiRepository},
+			"error s.searchRepository.InsertSearchHistory",
+			OMDBService{mockOMDBApiRepository, mockSearchRepository},
+			args{
+				mockCtx,
+				"keyword",
+				1,
+			},
+			OMDBSearchResponse{},
+			true,
+			func() {
+				mockOMDBApiRepository.EXPECT().
+					Search(mockCtx, "keyword", int(1)).
+					Return(repository.OMDBSearchResponse{
+						Search: []repository.OMDBSearchResponseSearch{
+							{},
+						},
+					}, nil)
+
+				mockSearchRepository.EXPECT().
+					InsertSearchHistory(mockCtx, entity.Search{
+						Keyword: "keyword",
+						Page:    1,
+					}).
+					Return(errors.New("error"))
+			},
+		},
+		{
+			"error s.omdbAPIRepository.Search",
+			OMDBService{mockOMDBApiRepository, mockSearchRepository},
 			args{
 				mockCtx,
 				"keyword",
@@ -112,6 +149,7 @@ func TestOMDBService_GetByID(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockOMDBApiRepository := mock_service_provider.NewMockOMDBApiRepositoryInterface(ctrl)
+	mockSearchRepository := mock_service_provider.NewMockSearchRepositoryInterface(ctrl)
 	mockCtx := context.Background()
 
 	type args struct {
@@ -128,7 +166,7 @@ func TestOMDBService_GetByID(t *testing.T) {
 	}{
 		{
 			"success",
-			OMDBService{mockOMDBApiRepository},
+			OMDBService{mockOMDBApiRepository, mockSearchRepository},
 			args{
 				mockCtx,
 				"imdbid",
@@ -151,7 +189,7 @@ func TestOMDBService_GetByID(t *testing.T) {
 		},
 		{
 			"error",
-			OMDBService{mockOMDBApiRepository},
+			OMDBService{mockOMDBApiRepository, mockSearchRepository},
 			args{
 				mockCtx,
 				"imdbid",

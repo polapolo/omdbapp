@@ -98,8 +98,5 @@ func migrateDB(db *sqlx.DB) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = m.Up()
-	if err != nil {
-		log.Fatal(err)
-	}
+	m.Up()
 }

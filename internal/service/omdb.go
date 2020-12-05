@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"github.com/polapolo/omdbapp/internal/entity"
 	"github.com/polapolo/omdbapp/internal/repository"
 )
 
@@ -14,15 +15,22 @@ type OMDBApiRepositoryInterface interface {
 	GetByID(ctx context.Context, imdbID string) (repository.OMDBGetByIDResponse, error)
 }
 
+// SearchRepositoryInterface -> abstraction for SearchRepository (Dependency injection, for unit test)
+type SearchRepositoryInterface interface {
+	InsertSearchHistory(ctx context.Context, row entity.Search) error
+}
+
 // OMDBService -> OMDBService object
 type OMDBService struct {
-	omdbRepository OMDBApiRepositoryInterface
+	omdbAPIRepository OMDBApiRepositoryInterface
+	searchRepository  SearchRepositoryInterface
 }
 
 // NewOMDBService -> Create new OMDBService object
-func NewOMDBService(omdbAPIRepository OMDBApiRepositoryInterface) OMDBService {
+func NewOMDBService(omdbAPIRepository OMDBApiRepositoryInterface, searchRepository SearchRepositoryInterface) OMDBService {
 	return OMDBService{
-		omdbRepository: omdbAPIRepository,
+		omdbAPIRepository: omdbAPIRepository,
+		searchRepository:  searchRepository,
 	}
 }
 
@@ -33,7 +41,16 @@ func (s OMDBService) Search(ctx context.Context, keyword string, page int) (OMDB
 	var result OMDBSearchResponse
 
 	// hit api
-	response, err := s.omdbRepository.Search(ctx, keyword, page)
+	response, err := s.omdbAPIRepository.Search(ctx, keyword, page)
+	if err != nil {
+		return result, err
+	}
+
+	// insert search history to db
+	err = s.searchRepository.InsertSearchHistory(ctx, entity.Search{
+		Keyword: keyword,
+		Page:    page,
+	})
 	if err != nil {
 		return result, err
 	}
@@ -64,7 +81,7 @@ func (s OMDBService) GetByID(ctx context.Context, imdbID string) (OMDBGetByIDRes
 	var result OMDBGetByIDResponse
 
 	// hit api
-	response, err := s.omdbRepository.GetByID(ctx, imdbID)
+	response, err := s.omdbAPIRepository.GetByID(ctx, imdbID)
 	if err != nil {
 		return result, err
 	}

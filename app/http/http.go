@@ -20,9 +20,10 @@ func InitHTTPServer(db *sqlx.DB) *http.Server {
 
 	// init repositories
 	omdbAPIRepository := repository.NewOMDBApiRepository(omdbAPIHttpClient)
+	searchRepository := repository.NewSearchRepository(db)
 
 	// init services
-	omdbService := service.NewOMDBService(omdbAPIRepository)
+	omdbService := service.NewOMDBService(omdbAPIRepository, searchRepository)
 
 	// init usecases
 	omdbUsecase := usecase.NewOMDBUsecase(omdbService)
