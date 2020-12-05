@@ -9,8 +9,11 @@ services:
       - 8888:8888
     expose:
       - "8888"
+    links:
+      - "db:db"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
   db:
     container_name: db
     image: mysql:8.0.22
@@ -22,6 +25,10 @@ services:
       - "3306"
     environment:
       MYSQL_ROOT_PASSWORD: supersecretpassword
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
   adminer:
     container_name: adminer
     image: adminer

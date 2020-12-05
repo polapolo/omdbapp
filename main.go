@@ -7,14 +7,26 @@ import (
 	"os/signal"
 	"time"
 
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/mysql"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/jmoiron/sqlx"
 	httpserver "github.com/polapolo/omdbapp/app/http"
 )
 
 func main() {
 	var wait time.Duration
 
+	// init log
+	initLog()
+
+	// init db
+	db := initDB()
+	defer db.Close()
+
 	// HTTP Server
-	httpServer := httpserver.InitHTTPServer()
+	httpServer := httpserver.InitHTTPServer(db)
 	go func() {
 		log.Println("[omdbapp][API] Served on " + httpServer.Addr)
 		if err := httpServer.ListenAndServe(); err != nil {
@@ -41,4 +53,53 @@ func main() {
 	// to finalize based on context cancellation.
 	log.Println("shutting down")
 	os.Exit(0)
+}
+
+func initLog() {
+	// Enable line numbers in logging
+	log.SetFlags(log.LstdFlags | log.Llongfile)
+}
+
+func initDB() *sqlx.DB {
+	// create database if not exists
+	db1, err := sqlx.Open("mysql", "root:supersecretpassword@tcp(db:3306)/")
+	if err != nil {
+		log.Fatal(err)
+	}
+	db1.Exec(`CREATE DATABASE IF NOT EXISTS omdb;`)
+	db1.Close()
+
+	// connect to database
+	db, err := sqlx.Connect("mysql", "root:supersecretpassword@tcp(db:3306)/omdb")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err = db.Ping(); err != nil {
+		log.Fatal(err)
+	}
+
+	// migrate database
+	migrateDB(db)
+
+	return db
+}
+
+func migrateDB(db *sqlx.DB) {
+	driver, err := mysql.WithInstance(db.DB, &mysql.Config{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	m, err := migrate.NewWithDatabaseInstance(
+		"file:///omdbapp/db/migrations",
+		"mysql",
+		driver,
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = m.Up()
+	if err != nil {
+		log.Fatal(err)
+	}
 }

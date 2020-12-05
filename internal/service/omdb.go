@@ -26,7 +26,9 @@ func NewOMDBService(omdbAPIRepository OMDBApiRepositoryInterface) OMDBService {
 	}
 }
 
-// Search -> HTTP Client hit omdbapi to search movie based on keyword and pagination
+// Search -
+// 1. HTTP Client hit omdbapi to search movie based on keyword and pagination
+// 2. Save search history into database
 func (s OMDBService) Search(ctx context.Context, keyword string, page int) (OMDBSearchResponse, error) {
 	var result OMDBSearchResponse
 

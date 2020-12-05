@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jmoiron/sqlx"
 	httpClient "github.com/polapolo/omdbapp/internal/client/http"
 	httpHandler "github.com/polapolo/omdbapp/internal/delivery/http"
 	"github.com/polapolo/omdbapp/internal/repository"
@@ -13,7 +14,7 @@ import (
 )
 
 // InitHTTPServer -> return http server to serve
-func InitHTTPServer() *http.Server {
+func InitHTTPServer(db *sqlx.DB) *http.Server {
 	// init http clients
 	omdbAPIHttpClient := httpClient.NewOMDBApiHTTPClient("http://www.omdbapi.com/", "faf7e5bb")
 
@@ -31,8 +32,8 @@ func InitHTTPServer() *http.Server {
 
 	// init routes
 	r := gin.Default()
-	r.GET("/search", func(c *gin.Context) { omdbHandler.Search(c) })
-	r.GET("/detail/:id", func(c *gin.Context) { omdbHandler.GetByID(c) })
+	r.GET("/search", func(c *gin.Context) { omdbHandler.MovieSearch(c) })
+	r.GET("/detail/:id", func(c *gin.Context) { omdbHandler.MovieDetail(c) })
 
 	// server
 	srv := &http.Server{
