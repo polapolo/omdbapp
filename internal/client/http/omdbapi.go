@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"strconv"
 
 	resty "github.com/go-resty/resty/v2"
@@ -46,6 +47,10 @@ func (c OMDBApiHTTPClient) Search(ctx context.Context, keyword string, page int)
 		return result, err
 	}
 
+	if result.Response != "False" {
+		return result, errors.New(result.Error)
+	}
+
 	return result, nil
 }
 
@@ -68,6 +73,10 @@ func (c OMDBApiHTTPClient) GetByID(ctx context.Context, imdbID string) (OMDBGetB
 	err = json.Unmarshal(response.Body(), &result)
 	if err != nil {
 		return result, err
+	}
+
+	if result.Response != "False" {
+		return result, errors.New(result.Error)
 	}
 
 	return result, nil
