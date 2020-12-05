@@ -8,7 +8,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	httpClient "github.com/polapolo/omdbapp/internal/client/http"
-	"github.com/polapolo/omdbapp/internal/mock_repository"
+	"github.com/polapolo/omdbapp/internal/mock_repository_provider"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,7 +16,7 @@ func TestNewOMDBApiRepository(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockOMDBHTTPClient := mock_repository.NewMockOMDBApiHTTPClientInterface(ctrl)
+	mockOMDBHTTPClient := mock_repository_provider.NewMockOMDBApiHTTPClientInterface(ctrl)
 
 	type args struct {
 		omdbAPIHTTPClient OMDBApiHTTPClientInterface
@@ -47,7 +47,7 @@ func TestOMDBApiRepository_Search(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockOMDBHTTPClient := mock_repository.NewMockOMDBApiHTTPClientInterface(ctrl)
+	mockOMDBHTTPClient := mock_repository_provider.NewMockOMDBApiHTTPClientInterface(ctrl)
 	mockCtx := context.Background()
 
 	type args struct {
@@ -122,7 +122,7 @@ func TestOMDBApiRepository_GetByID(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockOMDBHTTPClient := mock_repository.NewMockOMDBApiHTTPClientInterface(ctrl)
+	mockOMDBHTTPClient := mock_repository_provider.NewMockOMDBApiHTTPClientInterface(ctrl)
 	mockCtx := context.Background()
 
 	type args struct {

@@ -1,37 +1,37 @@
-package repository
+package service
 
 import (
 	"context"
 
-	httpClient "github.com/polapolo/omdbapp/internal/client/http"
+	"github.com/polapolo/omdbapp/internal/repository"
 )
 
-//go:generate mockgen -source=omdbapi.go -destination=../mock_repository_provider/mock_omdbapi.go -package=mock_repository_provider
+//go:generate mockgen -source=omdb.go -destination=../mock_service_provider/mock_omdb.go -package=mock_service_provider
 
-// OMDBApiHTTPClientInterface -> abstraction for OMDBApiHTTPClient (Dependency injection, for unit test)
-type OMDBApiHTTPClientInterface interface {
-	Search(ctx context.Context, keyword string, page int) (httpClient.OMDBSearchResponse, error)
-	GetByID(ctx context.Context, imdbID string) (httpClient.OMDBGetByIDResponse, error)
+// OMDBApiRepositoryInterface -> abstraction for OMDBApiRepository (Dependency injection, for unit test)
+type OMDBApiRepositoryInterface interface {
+	Search(ctx context.Context, keyword string, page int) (repository.OMDBSearchResponse, error)
+	GetByID(ctx context.Context, imdbID string) (repository.OMDBGetByIDResponse, error)
 }
 
-// OMDBApiRepository -> OMDBApiRepository object
-type OMDBApiRepository struct {
-	omdbAPIHTTPClient OMDBApiHTTPClientInterface
+// OMDBService -> OMDBService object
+type OMDBService struct {
+	omdbRepository OMDBApiRepositoryInterface
 }
 
-// NewOMDBApiRepository -> Create new OMDBApiRepository object
-func NewOMDBApiRepository(omdbAPIHTTPClient OMDBApiHTTPClientInterface) OMDBApiRepository {
-	return OMDBApiRepository{
-		omdbAPIHTTPClient: omdbAPIHTTPClient,
+// NewOMDBService -> Create new OMDBService object
+func NewOMDBService(omdbAPIRepository OMDBApiRepositoryInterface) OMDBService {
+	return OMDBService{
+		omdbRepository: omdbAPIRepository,
 	}
 }
 
 // Search -> HTTP Client hit omdbapi to search movie based on keyword and pagination
-func (r OMDBApiRepository) Search(ctx context.Context, keyword string, page int) (OMDBSearchResponse, error) {
+func (s OMDBService) Search(ctx context.Context, keyword string, page int) (OMDBSearchResponse, error) {
 	var result OMDBSearchResponse
 
 	// hit api
-	response, err := r.omdbAPIHTTPClient.Search(ctx, keyword, page)
+	response, err := s.omdbRepository.Search(ctx, keyword, page)
 	if err != nil {
 		return result, err
 	}
@@ -58,11 +58,11 @@ func (r OMDBApiRepository) Search(ctx context.Context, keyword string, page int)
 }
 
 // GetByID -> HTTP Client hit omdbapi to get movie detail based on IMDb ID
-func (r OMDBApiRepository) GetByID(ctx context.Context, imdbID string) (OMDBGetByIDResponse, error) {
+func (s OMDBService) GetByID(ctx context.Context, imdbID string) (OMDBGetByIDResponse, error) {
 	var result OMDBGetByIDResponse
 
 	// hit api
-	response, err := r.omdbAPIHTTPClient.GetByID(ctx, imdbID)
+	response, err := s.omdbRepository.GetByID(ctx, imdbID)
 	if err != nil {
 		return result, err
 	}
