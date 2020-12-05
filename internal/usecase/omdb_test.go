@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewOMDBService(t *testing.T) {
+func TestNewOMDBUsecase(t *testing.T) {
 	type args struct {
 		omdbService OMDBServiceInterface
 	}
@@ -29,8 +29,8 @@ func TestNewOMDBService(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewOMDBService(tt.args.omdbService); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewOMDBService() = %v, want %v", got, tt.want)
+			if got := NewOMDBUsecase(tt.args.omdbService); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewOMDBUsecase() = %v, want %v", got, tt.want)
 			}
 		})
 	}

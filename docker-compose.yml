@@ -23,6 +23,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: supersecretpassword
   adminer:
+    container_name: adminer
     image: adminer
     restart: always
     ports:

@@ -19,8 +19,8 @@ type OMDBUsecase struct {
 	omdbService OMDBServiceInterface
 }
 
-// NewOMDBService -> Create new OMDBService object
-func NewOMDBService(omdbService OMDBServiceInterface) OMDBUsecase {
+// NewOMDBUsecase -> Create new OMDBUsecase object
+func NewOMDBUsecase(omdbService OMDBServiceInterface) OMDBUsecase {
 	return OMDBUsecase{
 		omdbService: omdbService,
 	}
