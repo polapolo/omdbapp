@@ -20,7 +20,7 @@ Mysql Client
 HTTP
 - Host: `http://localhost:8888`
 - Search
-    - Endpoint: `http://localhost:8888/search?keyword=batman&page=1`
+    - Endpoint: `GET` `http://localhost:8888/search?keyword=batman&page=1`
     - Response:
         ```
         {
@@ -105,7 +105,7 @@ HTTP
         }
         ```
 - Detail
-    - Endpoint: `http://localhost:8888/detail/tt0372784`
+    - Endpoint: `GET` `http://localhost:8888/detail/tt0372784`
     - Response:
         ```
         {
