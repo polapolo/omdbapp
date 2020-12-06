@@ -28,7 +28,7 @@ func NewOMDBHttpHandler(omdbUsecase OMDBUsecaseInterface) OMDBHttpHandler {
 	}
 }
 
-// MovieSearch -> Handler to search for movies by keyword and page
+// MovieSearch -> http handler to search for movies by keyword and page
 func (h OMDBHttpHandler) MovieSearch(c *gin.Context) {
 	// set default payload if empty
 	keyword := c.DefaultQuery("keyword", "")
@@ -61,7 +61,7 @@ func (h OMDBHttpHandler) MovieSearch(c *gin.Context) {
 	return
 }
 
-// MovieDetail -> Handler to search for movie by imdb id
+// MovieDetail -> http handler to search for movie by imdb id
 func (h OMDBHttpHandler) MovieDetail(c *gin.Context) {
 	// get search result
 	response, err := h.omdbUsecase.GetByID(c.Request.Context(), c.Param("id"))

@@ -38,7 +38,7 @@ func TestNewOMDBHttpHandler(t *testing.T) {
 	}
 }
 
-func TestOMDBHttpHandler_Search(t *testing.T) {
+func TestOMDBHttpHandler_MovieSearch(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -95,12 +95,12 @@ func TestOMDBHttpHandler_Search(t *testing.T) {
 	for _, tt := range tests {
 		tt.mock()
 		t.Run(tt.name, func(t *testing.T) {
-			tt.h.Search(tt.args.c)
+			tt.h.MovieSearch(tt.args.c)
 		})
 	}
 }
 
-func TestOMDBHttpHandler_GetByID(t *testing.T) {
+func TestOMDBHttpHandler_MovieDetail(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -151,7 +151,7 @@ func TestOMDBHttpHandler_GetByID(t *testing.T) {
 	for _, tt := range tests {
 		tt.mock()
 		t.Run(tt.name, func(t *testing.T) {
-			tt.h.GetByID(tt.args.c)
+			tt.h.MovieDetail(tt.args.c)
 		})
 	}
 }

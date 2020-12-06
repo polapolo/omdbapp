@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"net"
 	"os"
 	"os/signal"
 	"time"
@@ -12,6 +13,7 @@ import (
 	"github.com/golang-migrate/migrate/v4/database/mysql"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jmoiron/sqlx"
+	grpcserver "github.com/polapolo/omdbapp/app/grpc"
 	httpserver "github.com/polapolo/omdbapp/app/http"
 )
 
@@ -28,8 +30,22 @@ func main() {
 	// HTTP Server
 	httpServer := httpserver.InitHTTPServer(db)
 	go func() {
-		log.Println("[omdbapp][API] Served on " + httpServer.Addr)
+		log.Println("[omdbapp][HTTP] Served on " + httpServer.Addr)
 		if err := httpServer.ListenAndServe(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	// GRPC Server
+	grpcServer := grpcserver.InitGRPCServer(db)
+	go func() {
+		lis, err := net.Listen("tcp", `:9999`)
+		if err != nil {
+			log.Fatalf("failed to listen: %v", err)
+		}
+
+		log.Println("[omdbapp][GRPC] Served on " + ":9999")
+		if err := grpcServer.Serve(lis); err != nil {
 			log.Fatal(err)
 		}
 	}()
@@ -48,6 +64,7 @@ func main() {
 	// Doesn't block if no connections, but will otherwise wait
 	// until the timeout deadline.
 	httpServer.Shutdown(ctx)
+	grpcServer.GracefulStop()
 	// Optionally, you could run httpServer.Shutdown in a goroutine and block on
 	// <-ctx.Done() if your application should wait for other services
 	// to finalize based on context cancellation.

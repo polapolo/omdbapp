@@ -6,9 +6,11 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - 8888:8888
+      - 8888:8888 # http
+      - 9999:9999 # grpc
     expose:
-      - "8888"
+      - "8888" # http
+      - "9999" # grpc
     links:
       - "db:db"
     depends_on:
