@@ -15,8 +15,9 @@ import (
 
 func TestNewOMDBApiHTTPClient(t *testing.T) {
 	type args struct {
-		host   string
-		apiKey string
+		httpClient *http.Client
+		host       string
+		apiKey     string
 	}
 	tests := []struct {
 		name string
@@ -31,7 +32,7 @@ func TestNewOMDBApiHTTPClient(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewOMDBApiHTTPClient(tt.args.host, tt.args.apiKey); !reflect.DeepEqual(got, tt.want) {
+			if got := NewOMDBApiHTTPClient(tt.args.httpClient, tt.args.host, tt.args.apiKey); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewOMDBApiHTTPClient() = %v, want %v", got, tt.want)
 			}
 		})
@@ -68,6 +69,7 @@ func TestOMDBApiHTTPClient_Search(t *testing.T) {
 		{
 			"success",
 			OMDBApiHTTPClient{
+				&http.Client{},
 				"http://server.local",
 				"apikey",
 			},
@@ -88,6 +90,7 @@ func TestOMDBApiHTTPClient_Search(t *testing.T) {
 		{
 			"error response",
 			OMDBApiHTTPClient{
+				&http.Client{},
 				"http://server.local",
 				"apikey",
 			},
@@ -110,6 +113,7 @@ func TestOMDBApiHTTPClient_Search(t *testing.T) {
 		{
 			"error unmarshal",
 			OMDBApiHTTPClient{
+				&http.Client{},
 				"http://server.local",
 				"apikey",
 			},
@@ -130,6 +134,7 @@ func TestOMDBApiHTTPClient_Search(t *testing.T) {
 		{
 			"error ioutilReadAll",
 			OMDBApiHTTPClient{
+				&http.Client{},
 				"http://server.local",
 				"apikey",
 			},
@@ -154,6 +159,7 @@ func TestOMDBApiHTTPClient_Search(t *testing.T) {
 		{
 			"error httpGet",
 			OMDBApiHTTPClient{
+				&http.Client{},
 				"http://server.local",
 				"apikey",
 			},
@@ -173,7 +179,8 @@ func TestOMDBApiHTTPClient_Search(t *testing.T) {
 		{
 			"error urlParse",
 			OMDBApiHTTPClient{
-				"http://server.local",
+
+				&http.Client{}, "http://server.local",
 				"apikey",
 			},
 			args{
@@ -230,6 +237,7 @@ func TestOMDBApiHTTPClient_GetByID(t *testing.T) {
 		{
 			"success",
 			OMDBApiHTTPClient{
+				&http.Client{},
 				"http://server.local",
 				"apikey",
 			},
@@ -249,7 +257,8 @@ func TestOMDBApiHTTPClient_GetByID(t *testing.T) {
 		{
 			"error response",
 			OMDBApiHTTPClient{
-				"http://server.local",
+
+				&http.Client{}, "http://server.local",
 				"apikey",
 			},
 			args{
@@ -270,6 +279,7 @@ func TestOMDBApiHTTPClient_GetByID(t *testing.T) {
 		{
 			"error unmarshal",
 			OMDBApiHTTPClient{
+				&http.Client{},
 				"http://server.local",
 				"apikey",
 			},
@@ -289,6 +299,7 @@ func TestOMDBApiHTTPClient_GetByID(t *testing.T) {
 		{
 			"error ioutilReadAll",
 			OMDBApiHTTPClient{
+				&http.Client{},
 				"http://server.local",
 				"apikey",
 			},
@@ -312,6 +323,7 @@ func TestOMDBApiHTTPClient_GetByID(t *testing.T) {
 		{
 			"error httpGet",
 			OMDBApiHTTPClient{
+				&http.Client{},
 				"http://server.local",
 				"apikey",
 			},
@@ -330,7 +342,8 @@ func TestOMDBApiHTTPClient_GetByID(t *testing.T) {
 		{
 			"error urlParse",
 			OMDBApiHTTPClient{
-				"http://server.local",
+
+				&http.Client{}, "http://server.local",
 				"apikey",
 			},
 			args{

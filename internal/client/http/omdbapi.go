@@ -8,21 +8,26 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+
+	"github.com/polapolo/omdbapp/internal/constant"
+	"github.com/polapolo/omdbapp/internal/lib/distributedtracing"
 )
 
 // Docs: http://www.omdbapi.com/
 
 // OMDBApiHTTPClient -> OMDBApiHTTPClient object
 type OMDBApiHTTPClient struct {
-	Host   string
-	APIKey string
+	HTTPClient *http.Client
+	Host       string
+	APIKey     string
 }
 
 // NewOMDBApiHTTPClient -> Create new OMDBApiHTTPClient object
-func NewOMDBApiHTTPClient(host string, apiKey string) OMDBApiHTTPClient {
+func NewOMDBApiHTTPClient(httpClient *http.Client, host string, apiKey string) OMDBApiHTTPClient {
 	return OMDBApiHTTPClient{
-		Host:   host,
-		APIKey: apiKey,
+		HTTPClient: httpClient,
+		Host:       host,
+		APIKey:     apiKey,
 	}
 }
 
@@ -49,8 +54,17 @@ func (c OMDBApiHTTPClient) Search(ctx context.Context, keyword string, page int)
 	q.Set("page", strconv.Itoa(page))
 	u.RawQuery = q.Encode()
 
+	// create request
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+	if err != nil {
+		return result, err
+	}
+
+	_, tracerSpan, reqWithCtx := distributedtracing.StartExternalHTTPSegment(ctx, constant.SegmentHTTPClient+"Search", req)
+	defer tracerSpan.End()
+
 	// hit
-	response, err := httpGet(u.String())
+	response, err := c.HTTPClient.Do(reqWithCtx)
 	if err != nil {
 		return result, err
 	}
@@ -91,8 +105,17 @@ func (c OMDBApiHTTPClient) GetByID(ctx context.Context, imdbID string) (OMDBGetB
 	q.Set("i", imdbID)
 	u.RawQuery = q.Encode()
 
+	// create request
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+	if err != nil {
+		return result, err
+	}
+
+	_, tracerSpan, reqWithCtx := distributedtracing.StartExternalHTTPSegment(ctx, constant.SegmentHTTPClient+"GetByID", req)
+	defer tracerSpan.End()
+
 	// hit
-	response, err := httpGet(u.String())
+	response, err := c.HTTPClient.Do(reqWithCtx)
 	if err != nil {
 		return result, err
 	}

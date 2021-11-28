@@ -3,6 +3,8 @@ package usecase
 import (
 	"context"
 
+	"github.com/polapolo/omdbapp/internal/constant"
+	"github.com/polapolo/omdbapp/internal/lib/distributedtracing"
 	"github.com/polapolo/omdbapp/internal/service"
 )
 
@@ -28,9 +30,12 @@ func NewOMDBUsecase(omdbService OMDBServiceInterface) OMDBUsecase {
 
 // Search -> HTTP Client hit omdbapi to search movie based on keyword and pagination
 func (u OMDBUsecase) Search(ctx context.Context, keyword string, page int) (OMDBSearchResponse, error) {
+	ctxSegment, tracerSpan := distributedtracing.StartSegment(ctx, constant.SegmentUsecase+"Search")
+	defer tracerSpan.End()
+
 	var result OMDBSearchResponse
 
-	response, err := u.omdbService.Search(ctx, keyword, page)
+	response, err := u.omdbService.Search(ctxSegment, keyword, page)
 	if err != nil {
 		return result, err
 	}
@@ -38,13 +43,7 @@ func (u OMDBUsecase) Search(ctx context.Context, keyword string, page int) (OMDB
 	// map response
 	searchResult := make([]OMDBSearchResponseSearch, 0)
 	for _, movie := range response.Search {
-		searchResult = append(searchResult, OMDBSearchResponseSearch{
-			Title:  movie.Title,
-			Year:   movie.Year,
-			ImdbID: movie.ImdbID,
-			Type:   movie.Type,
-			Poster: movie.Poster,
-		})
+		searchResult = append(searchResult, OMDBSearchResponseSearch(movie))
 	}
 	result = OMDBSearchResponse{
 		Search:       searchResult,
@@ -58,9 +57,12 @@ func (u OMDBUsecase) Search(ctx context.Context, keyword string, page int) (OMDB
 
 // GetByID -> HTTP Client hit omdbapi to get movie detail based on IMDb ID
 func (u OMDBUsecase) GetByID(ctx context.Context, imdbID string) (OMDBGetByIDResponse, error) {
+	ctxSegment, tracerSpan := distributedtracing.StartSegment(ctx, constant.SegmentUsecase+"GetByID")
+	defer tracerSpan.End()
+
 	var result OMDBGetByIDResponse
 
-	response, err := u.omdbService.GetByID(ctx, imdbID)
+	response, err := u.omdbService.GetByID(ctxSegment, imdbID)
 	if err != nil {
 		return result, err
 	}
@@ -68,10 +70,7 @@ func (u OMDBUsecase) GetByID(ctx context.Context, imdbID string) (OMDBGetByIDRes
 	// map response
 	ratings := make([]OMDBGetByIDResponseRating, 0)
 	for _, rating := range response.Ratings {
-		ratings = append(ratings, OMDBGetByIDResponseRating{
-			Source: rating.Source,
-			Value:  rating.Value,
-		})
+		ratings = append(ratings, OMDBGetByIDResponseRating(rating))
 	}
 	result = OMDBGetByIDResponse{
 		Title:      response.Title,

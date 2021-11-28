@@ -5,6 +5,9 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+
+	"github.com/polapolo/omdbapp/internal/constant"
+	"github.com/polapolo/omdbapp/internal/lib/distributedtracing"
 	"github.com/polapolo/omdbapp/internal/usecase"
 )
 
@@ -30,6 +33,9 @@ func NewOMDBHttpHandler(omdbUsecase OMDBUsecaseInterface) OMDBHttpHandler {
 
 // MovieSearch -> http handler to search for movies by keyword and page
 func (h OMDBHttpHandler) MovieSearch(c *gin.Context) {
+	ctxSegment, tracerSpan := distributedtracing.StartSegment(c.Request.Context(), constant.SegmentHTTPHandler+"MovieSearch")
+	defer tracerSpan.End()
+
 	// set default payload if empty
 	keyword := c.DefaultQuery("keyword", "")
 	pageStr := c.DefaultQuery("page", "1")
@@ -45,7 +51,7 @@ func (h OMDBHttpHandler) MovieSearch(c *gin.Context) {
 	}
 
 	// get search result
-	response, err := h.omdbUsecase.Search(c.Request.Context(), keyword, page)
+	response, err := h.omdbUsecase.Search(ctxSegment, keyword, page)
 	if err != nil {
 		c.JSON(200, gin.H{
 			"data":  []struct{}{},
@@ -63,8 +69,11 @@ func (h OMDBHttpHandler) MovieSearch(c *gin.Context) {
 
 // MovieDetail -> http handler to search for movie by imdb id
 func (h OMDBHttpHandler) MovieDetail(c *gin.Context) {
+	ctxSegment, tracerSpan := distributedtracing.StartSegment(c.Request.Context(), constant.SegmentHTTPHandler+"MovieDetail")
+	defer tracerSpan.End()
+
 	// get search result
-	response, err := h.omdbUsecase.GetByID(c.Request.Context(), c.Param("id"))
+	response, err := h.omdbUsecase.GetByID(ctxSegment, c.Param("id"))
 	if err != nil {
 		c.JSON(200, gin.H{
 			"data":  []struct{}{},

@@ -4,7 +4,9 @@ import (
 	"context"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/polapolo/omdbapp/internal/constant"
 	"github.com/polapolo/omdbapp/internal/entity"
+	"github.com/polapolo/omdbapp/internal/lib/distributedtracing"
 )
 
 // SearchRepository -> SearchRepository object
@@ -21,7 +23,12 @@ func NewSearchRepository(db *sqlx.DB) SearchRepository {
 
 // InsertSearchHistory -> insert 1 row of search history
 func (r SearchRepository) InsertSearchHistory(ctx context.Context, row entity.Search) error {
-	_, err := r.db.ExecContext(ctx, `INSERT INTO search(keyword, page) VALUES(?, ?);`, row.Keyword, row.Page)
+	query := `INSERT INTO search(keyword, page) VALUES(?, ?);`
+
+	ctxSegment, tracerSpan := distributedtracing.StartPostgresSegment(ctx, constant.SegmentRepository+"InsertSearchHistory", query)
+	defer tracerSpan.End()
+
+	_, err := r.db.ExecContext(ctxSegment, query, row.Keyword, row.Page)
 	if err != nil {
 		return err
 	}
